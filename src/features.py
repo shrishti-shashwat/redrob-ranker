@@ -56,10 +56,10 @@ CV_SPEECH_SKILLS = {
 
 RX_RETRIEVAL = re.compile(
     r"retriev|ranking|ranker|recommend|relevance|semantic search|"
-    r"vector (search|database|index)|embedding|faiss|elasticsearch|"
+    r"vector (?:search|database|index)|embedding|faiss|elasticsearch|"
     r"opensearch|pinecone|weaviate|qdrant|milvus|bm25|hybrid search|"
-    r"search (system|engine|infra|quality|backend|platform)|learning.to.rank",
-    re.I)
+    r"search (?:system|engine|infra|quality|backend|platform)|learning.to.rank",
+    re.I)  # groups must stay non-capturing: findall() feeds a distinct count
 RX_PRODUCTION = re.compile(
     r"production|deployed|shipped|serving|inference|launch|real users|"
     r"at scale|latency|on.call|rolled out", re.I)
@@ -154,7 +154,8 @@ def fit_features(c: dict) -> dict:
     hist_search = sum(1 for j in c["career_history"] if RX_SEARCH_TITLE.search(j["title"]))
 
     # --- text evidence (career descriptions + summary)
-    ev_retrieval = len(set(RX_RETRIEVAL.findall(text)))
+    retrieval_terms = sorted({m.lower() for m in RX_RETRIEVAL.findall(text)})
+    ev_retrieval = len(retrieval_terms)
     ev_production = bool(RX_PRODUCTION.search(text))
     ev_eval = bool(RX_EVAL.search(text))
     ev_llm = bool(RX_LLM.search(text))
@@ -207,8 +208,12 @@ def fit_features(c: dict) -> dict:
 
     # --- evidence facts for reasoning
     if ev_retrieval:
-        m = RX_RETRIEVAL.search(text)
+        facts["retrieval_terms"] = retrieval_terms[:3]
         facts["evidence"].append("retrieval/ranking work in career history")
+    prod_cos = [j["company"] for j in c["career_history"]
+                if j["company"] in PRODUCT]
+    if prod_cos:
+        facts["product_companies"] = list(dict.fromkeys(prod_cos))[:2]
     if ev_eval:
         facts["evidence"].append("ranking-evaluation experience (NDCG/A-B style)")
     if ev_llm:
