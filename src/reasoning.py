@@ -124,7 +124,7 @@ def build_reasoning(rank: int, f: dict, av: dict) -> str:
     d = av.get("days_inactive", 0)
     if d > 150:
         concerns.append(f"not seen on platform for ~{d // 30} months")
-    elif d > 45:
+    elif d >= 40:  # ~6 weeks; >45 left a row dormant exactly 42 days silent
         concerns.append(f"last active ~{d // 7} weeks ago")
     if not av.get("open_to_work", True):
         concerns.append("not flagged open-to-work")
