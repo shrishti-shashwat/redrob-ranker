@@ -4,3 +4,7 @@ artifacts/embeddings.npy
 audit/
 submission.csv
 artifacts/features.pkl
+deck_png/
+deck_qa/
+deck_qa2/
+pptx_scripts/
