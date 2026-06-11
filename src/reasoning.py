@@ -114,15 +114,20 @@ def build_reasoning(rank: int, f: dict, av: dict) -> str:
 
     concerns = list(facts["concerns"])
     n = av.get("notice")
-    if n is not None and n > 75:
-        concerns.append(f"{n}-day notice period")
+    if n is not None and n > 30:  # JD: buyout covers up to 30 days only
+        concerns.append(f"{n}-day notice, above the 30-day buyout window")
     loc = av.get("location", "")
     if "India" not in loc:
-        concerns.append(f"based in {loc.split(',')[-1].strip()} (no visa sponsorship)")
+        tail = "" if av.get("relocate") else ", not willing to relocate"
+        concerns.append(
+            f"based in {loc.split(',')[-1].strip()} (no visa sponsorship{tail})")
     d = av.get("days_inactive", 0)
     if d > 150:
-        concerns = [c for c in concerns if "inactive" not in c]
         concerns.append(f"not seen on platform for ~{d // 30} months")
+    elif d > 45:
+        concerns.append(f"last active ~{d // 7} weeks ago")
+    if not av.get("open_to_work", True):
+        concerns.append("not flagged open-to-work")
 
     s = head
     if ev:
@@ -134,9 +139,7 @@ def build_reasoning(rank: int, f: dict, av: dict) -> str:
 
     if concerns:
         joiner = [". Concern: ", ". Caveat: ", "; concern — "][variant % 3]
-        s += joiner + concerns[0]
-        if rank > 50 and len(concerns) > 1:
-            s += f" and {concerns[1]}"
+        s += joiner + " and ".join(concerns[:2])
     elif rank > 85:
         s += [". Solid-but-adjacent fit at this depth of the list",
               ". Included as a credible backfill rather than a core match"][variant % 2]

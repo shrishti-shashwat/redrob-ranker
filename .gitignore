@@ -3,3 +3,4 @@ __pycache__/
 artifacts/embeddings.npy
 audit/
 submission.csv
+artifacts/features.pkl

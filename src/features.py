@@ -267,6 +267,7 @@ def availability(c: dict) -> tuple[float, dict]:
     facts["response_rate"] = rr
 
     f_open = 1.0 if sig.get("open_to_work_flag") else 0.75
+    facts["open_to_work"] = bool(sig.get("open_to_work_flag"))
 
     notice = sig.get("notice_period_days", 60)
     if notice <= 30:
@@ -289,7 +290,11 @@ def availability(c: dict) -> tuple[float, dict]:
     elif country == "India":
         f_loc = 0.9 if relocate else 0.78
     else:
-        f_loc = 0.62 if relocate else 0.45  # no visa sponsorship
+        # No visa sponsorship; JD ideal is "located in or willing to
+        # relocate to Noida or Pune". Abroad + unwilling to relocate is
+        # near-disqualifying, not a mild discount — without this, two
+        # non-relocating overseas profiles outranked ~70 India-based fits.
+        f_loc = 0.62 if relocate else 0.30
     facts["location"] = f"{p.get('location')}, {country}"
     facts["relocate"] = relocate
 

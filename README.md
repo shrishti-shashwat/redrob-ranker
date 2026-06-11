@@ -12,18 +12,22 @@ behavioral-availability adjustment → programmatic per-candidate reasoning.
 pip install -r requirements.txt
 
 # 1. Offline pre-computation (may exceed 5 min; spec §10.3 allows this)
-python src/embed.py --candidates ./candidates.jsonl   # ~25 min CPU
-python src/bm25.py  --candidates ./candidates.jsonl   # ~3 min
+python src/embed.py --candidates ./candidates.jsonl                # ~80 min CPU
+python src/bm25.py  --candidates ./candidates.jsonl                # ~3 min
+python src/precompute_features.py --candidates ./candidates.jsonl  # ~5 min
 
-# 2. Constrained ranking step (<5 min, CPU-only, no network)
+# 2. Constrained ranking step (~2 s with artifacts, CPU-only, no network)
 python src/rank.py --candidates ./candidates.jsonl --out submission.csv
 
 # 3. Self-audit before submitting
 python src/audit.py --candidates ./candidates.jsonl --submission submission.csv
 ```
 
-Artifacts land in `artifacts/` (embeddings ~150 MB — regenerate with
-`embed.py` if not shipped).
+Artifacts land in `artifacts/` (embeddings ~150 MB, features cache ~25 MB —
+regenerate with the step-1 scripts if not shipped). `rank.py` falls back to
+live feature extraction (~2–5 min) when `features.pkl` is absent; with all
+artifacts present it completes in seconds, so the 5-minute window is never
+at the mercy of disk cache or CPU contention.
 
 ## Design in one paragraph
 
@@ -51,6 +55,7 @@ penalties. Behavioral signals form a multiplicative availability factor
 | `src/features.py` | Honeypot checks, structured fit features, availability |
 | `src/embed.py` | Offline: MiniLM embeddings for all 100K + JD facets |
 | `src/bm25.py` | Offline: BM25 scores vs JD-derived query |
+| `src/precompute_features.py` | Offline: cache structured features/availability/honeypots |
 | `src/rank.py` | The ≤5-min step: fuse, multiply, top-100 CSV |
 | `src/reasoning.py` | Programmatic reasoning (no LLM, no hallucination) |
 | `src/audit.py` | Honeypot zero-check, twin check, top-50 manual dump |

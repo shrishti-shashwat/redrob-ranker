@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import pickle
 import time
 
 import numpy as np
@@ -21,6 +22,24 @@ import numpy as np
 from common import ARTIFACTS, iter_candidates
 from features import availability, fit_features, honeypot_reasons
 from reasoning import build_reasoning
+
+
+def load_candidate_rows(path: str, ids_order: list[str]):
+    """Yield (candidate_id, features, avail, av_facts, is_honeypot).
+
+    Prefers the features.pkl artifact (precompute_features.py) — parsing
+    the ~487 MB JSONL in here measured 127-311s of the 5-min budget.
+    Falls back to live streaming so rank.py stays runnable standalone.
+    """
+    cache = ARTIFACTS / "features.pkl"
+    if cache.exists():
+        rows = pickle.loads(cache.read_bytes())
+        if [r[0] for r in rows] == ids_order:
+            return rows
+        print("features.pkl stale (id mismatch); re-extracting live")
+    return [(c["candidate_id"], fit_features(c), *availability(c),
+             bool(honeypot_reasons(c)))
+            for c in iter_candidates(path)]
 
 # Fusion weights (tuned via audit.py inspection, no labels exist).
 W_STRUCT, W_SEMANTIC, W_BM25 = 0.45, 0.40, 0.15
@@ -87,17 +106,16 @@ def main() -> None:
 
     sem_z, bm25_z = znorm(semantic), znorm(bm25)
 
-    rows = []
-    for i, c in enumerate(iter_candidates(args.candidates)):
-        assert c["candidate_id"] == ids_order[i], "artifact/data order mismatch"
-        f = fit_features(c)
-        struct = structured_score(f)
-        # z-fusion of the two retrieval signals, squashed to [0,1]
-        sem01 = 1 / (1 + np.exp(-sem_z[i]))
-        bm01 = 1 / (1 + np.exp(-bm25_z[i]))
-        fit = W_STRUCT * struct + W_SEMANTIC * sem01 + W_BM25 * bm01
+    sem01 = 1 / (1 + np.exp(-sem_z))
+    bm01 = 1 / (1 + np.exp(-bm25_z))
 
-        hp = honeypot_reasons(c)
+    rows = []
+    for i, (cid, f, avail, av_facts, hp) in enumerate(
+            load_candidate_rows(args.candidates, ids_order)):
+        assert cid == ids_order[i], "artifact/data order mismatch"
+        struct = structured_score(f)
+        fit = W_STRUCT * struct + W_SEMANTIC * sem01[i] + W_BM25 * bm01[i]
+
         if hp:
             fit *= KILL_HONEYPOT
         if f["consulting_only"]:
@@ -107,9 +125,8 @@ def main() -> None:
         if f["non_tech"]:
             fit *= DAMP_NON_TECH
 
-        avail, av_facts = availability(c)
         score = fit * avail
-        rows.append((score, c["candidate_id"], f, av_facts, hp))
+        rows.append((score, cid, f, av_facts, hp))
 
     # deterministic tie-break: score desc, then candidate_id asc
     rows.sort(key=lambda r: (-r[0], r[1]))
