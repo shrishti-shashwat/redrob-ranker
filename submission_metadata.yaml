@@ -22,9 +22,9 @@ team_members:
 # ============================================================================
 # Code and reproducibility
 # ============================================================================
-github_repo: "https://github.com/YOUR_USERNAME/redrob-ranker"   # TODO: set after pushing
+github_repo: "https://github.com/shrishti-shashwat/redrob-ranker"
 
-sandbox_link: "https://huggingface.co/spaces/YOUR_USERNAME/redrob-ranker"  # TODO: set after deploying Space
+sandbox_link: "https://huggingface.co/spaces/Shrishti24/redrob-ranker"
 
 reproduce_command: "python src/rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 # Runs in ~2 s with shipped artifacts (falls back to ~2-5 min live extraction

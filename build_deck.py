@@ -20,8 +20,8 @@ INK, PURPLE = "202729", "7D45E0"
 
 TEAM_NAME = "Starva"
 TEAM_LEADER = "Shrishti"
-GITHUB_URL = "<<GITHUB REPO URL>>"
-SANDBOX_URL = "<<SANDBOX LINK>>"
+GITHUB_URL = "https://github.com/shrishti-shashwat/redrob-ranker"
+SANDBOX_URL = "https://huggingface.co/spaces/Shrishti24/redrob-ranker"
 
 
 def el(tag, **attrs):
@@ -311,7 +311,7 @@ fill_body(S[8], [
 # ---- Slide 10: Submission Assets ----------------------------------------------
 fill_body(S[9], [
     (f"GitHub repository: {GITHUB_URL} — full source, README with "
-     "one-command reproduction, precompute scripts, 5 commits of real "
+     "one-command reproduction, precompute scripts, commit-by-commit "
      "iteration history", dict(size=11.5, bullet="dot")),
     ("Ranked output: submission.csv — top-100, passes the official "
      "validator", dict(size=11.5, bullet="dot")),

@@ -17,7 +17,14 @@ from sandbox_core import SAMPLE, rank_from_source
 
 
 def run(file_obj):
-    src = file_obj.name if file_obj is not None else str(SAMPLE)
+    # gr.File returns a path string (gradio>=4 default) or, on older
+    # versions, an object with .name. None when nothing is uploaded.
+    if file_obj is None:
+        src = str(SAMPLE)
+    elif isinstance(file_obj, str):
+        src = file_obj
+    else:
+        src = file_obj.name
     status, df, csv_path = rank_from_source(src)
     return status, df.head(25), csv_path
 
