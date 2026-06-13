@@ -18,11 +18,10 @@ from pptx.util import Emu, Inches, Pt
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 INK, PURPLE = "202729", "7D45E0"
 
-TEAM_NAME = "<<TEAM NAME>>"
-TEAM_LEADER = "<<TEAM LEADER NAME>>"
+TEAM_NAME = "Starva"
+TEAM_LEADER = "Shrishti"
 GITHUB_URL = "<<GITHUB REPO URL>>"
 SANDBOX_URL = "<<SANDBOX LINK>>"
-VIDEO_URL = "<<DEMO VIDEO LINK>>"
 
 
 def el(tag, **attrs):
@@ -298,8 +297,8 @@ fill_body(S[8], [
     ("sentence-transformers (MiniLM-L6-v2, 22M params) — the best "
      "quality-per-CPU-second bi-encoder at this scale; embeds the full pool "
      "offline without a GPU", dict(size=11, bullet="dot")),
-    ("rank-bm25 — document-length-aware lexical signal fused alongside "
-     "semantics", dict(size=11, bullet="dot")),
+    ("Custom BM25 (NumPy, K1=1.5 b=0.75) — document-length-aware lexical "
+     "signal fused alongside semantics; no black-box dependency", dict(size=11, bullet="dot")),
     ("Python stdlib for feature extraction and reasoning generation — "
      "deterministic, no-network, zero-hallucination runtime", dict(size=11, bullet="dot")),
     ("NPY / pickle artifact cache — moves every heavy step out of the timed "
@@ -316,9 +315,8 @@ fill_body(S[9], [
      "iteration history", dict(size=11.5, bullet="dot")),
     ("Ranked output: submission.csv — top-100, passes the official "
      "validator", dict(size=11.5, bullet="dot")),
-    (f"Sandbox: {SANDBOX_URL} — hosted environment running the ranker "
-     "end-to-end on a sample", dict(size=11.5, bullet="dot")),
-    (f"Demo video: {VIDEO_URL}", dict(size=11.5, bullet="dot")),
+    (f"Sandbox: {SANDBOX_URL} — HuggingFace Space running the ranker "
+     "end-to-end on a candidate sample (≤100) in-browser", dict(size=11.5, bullet="dot")),
     ("submission_metadata.yaml at repo root mirrors the portal metadata",
      dict(size=11.5, bullet="dot")),
 ])

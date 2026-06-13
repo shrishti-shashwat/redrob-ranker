@@ -1,0 +1,86 @@
+# Redrob Hackathon — Submission Metadata
+# Mirrors the portal metadata for Stage 3 review.
+
+# ============================================================================
+# Team identity
+# ============================================================================
+team_name: "Starva"
+
+primary_contact:
+  name: "Utkarsh Mishra"
+  email: "utkarshmishra0701@gmail.com"
+  phone: "+91-7417297529"
+
+team_members:
+  - name: "Shrishti"
+    email: "shrishtibhushan1119@gmail.com"
+    role: "Team Lead"
+  - name: "Utkarsh Mishra"
+    email: "utkarshmishra0701@gmail.com"
+    role: "ML Engineer"
+
+# ============================================================================
+# Code and reproducibility
+# ============================================================================
+github_repo: "https://github.com/YOUR_USERNAME/redrob-ranker"   # TODO: set after pushing
+
+sandbox_link: "https://huggingface.co/spaces/YOUR_USERNAME/redrob-ranker"  # TODO: set after deploying Space
+
+reproduce_command: "python src/rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+# Runs in ~2 s with shipped artifacts (falls back to ~2-5 min live extraction
+# if features.pkl is absent). Offline precompute scripts documented in README.
+
+# ============================================================================
+# Compute environment
+# ============================================================================
+compute:
+  platform: "Local Windows PC"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.11.9"
+  os: "Windows 11"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: true
+  pre_computation_time_minutes: 90   # MiniLM embeddings + BM25 + feature cache over 100K
+
+# ============================================================================
+# AI tools declaration
+# ============================================================================
+ai_tools_used:
+  - "GitHub Copilot"
+
+ai_usage_summary: |
+  Used GitHub Copilot for code autocomplete during development. No candidate
+  data was fed to any LLM; the ranking pipeline itself uses no LLM at runtime.
+
+# ============================================================================
+# Approach summary
+# ============================================================================
+methodology_summary: |
+  Hybrid ranker over 100K profiles for a Senior AI Engineer JD. Stage 1:
+  deterministic honeypot/consistency checks (expert-skill-with-0-months,
+  current-job implied-date vs the dataset's frozen 2026-06 clock, career-span
+  vs stated-experience) exclude impossible profiles. Stage 2: corroboration-
+  gated structured features — skills score only when title or career history
+  corroborates them (measured P(PyTorch|ML-titled)=21.6% vs 1.2%), killing
+  keyword stuffers. Stage 3: fusion of MiniLM bi-encoder semantic similarity
+  (5 authored JD facets) + custom BM25, z-normalised and combined with the
+  structured score (0.45/0.40/0.15). Graded JD disqualifiers: consulting-only
+  and research-only careers are multiplicative kills; job-hopping, CV/speech-
+  only, LangChain-only are penalties. Stage 4: a behavioral availability
+  multiplier (recency, recruiter response, open-to-work, notice, location)
+  modulates the score, separating "behavioral twins". Reasoning is generated
+  programmatically from extracted facts — no LLM, zero hallucination. The timed
+  ranking step runs in ~2 s on CPU; heavy work is precomputed offline per
+  spec §10.3.
+
+# ============================================================================
+# Declarations
+# ============================================================================
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true

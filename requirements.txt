@@ -1,3 +1,6 @@
 numpy>=1.26
 sentence-transformers>=3.0
 torch>=2.2
+# sandbox (HuggingFace Space) only — the core ranker does not need these:
+gradio>=4.44
+pandas>=2.0
