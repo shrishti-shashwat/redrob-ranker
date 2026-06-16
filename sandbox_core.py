@@ -79,6 +79,9 @@ def rank_candidates(cands: list[dict], top_k: int = 100) -> pd.DataFrame:
     semantic = sims[:, -2:].mean(axis=1)
     bm25 = bm25_live(cands)
 
+    # z-normalisation is relative to the candidate pool passed in, so the
+    # absolute scores on a small sample differ from the full 100K run even
+    # though the scoring/fusion logic is identical — ordering is what matters.
     def znorm(x):
         return (x - x.mean()) / (x.std() + 1e-9)
 
